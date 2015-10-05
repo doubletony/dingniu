@@ -35,6 +35,9 @@ class Tile():
   def __unicode__(self):
     return unichr(TILE_UNICODE_MAP[tileHash([self.left, self.right])])
 
+  def getPoints(self):
+    return self.left + self.right
+
 class Board():
   """docstring for Board"""
   def __init__(self):
@@ -129,8 +132,8 @@ class Player():
       except Exception, e:
         print '[Error!] Cannot add the tile.'
 
-  def getTotalCount(self):
-    return sum(self.discards)
+  def getTotalPoints(self):
+    return sum([i.getPoints() for i in self.discards])
     
 class Game():
   """docstring for Game"""
@@ -169,6 +172,42 @@ class Game():
     for x in range(rounds):
       for player in self.players:
         player.deal(self.board)
+
+    print 'Results:'
+    points = []
+    for player in self.players:
+      point = player.getTotalPoints()
+      print player.name, point, 'points.'
+      points.append(point)
+    min_point = min(points)
+    max_point = max(points)
+    total_award = 0
+    BIG_PENALTY = 2
+    SMALL_PENALTY = 1
+    winner_count = 0
+
+    # Calculate the award amount
+    for player in self.players:
+      point = player.getTotalPoints()
+      if point == max_point:
+        total_award += BIG_PENALTY
+      elif point > min_point:
+        total_award += SMALL_PENALTY
+      else:
+        # winner
+        winner_count += 1
+
+    # Assign the awards and penalty
+    for player in self.players:
+      point = player.getTotalPoints()
+      if point == max_point:
+        print player.name, 'loses', '$' + str(BIG_PENALTY)
+      elif point > min_point:
+        print player.name, 'loses', '$' + str(SMALL_PENALTY)
+      else:
+        # winner
+        print player.name, 'wins', '$' + str(total_award / winner_count)
+
 
 def tileUnicodeTest():
   tiles = [
