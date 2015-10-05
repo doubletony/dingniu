@@ -57,14 +57,15 @@ class Board():
         self.tiles.insert(0, Tile(tile.left, tile.right))
         self.left = tile.left
         return
-    if self.right == tile.left:
-      self.tiles.append(Tile(tile.left, tile.right))
-      self.right = tile.right
-      return
-    elif self.right == tile.right:
-      self.tiles.append(Tile(tile.right, tile.left))
-      self.right = tile.left
-      return
+    else:
+      if self.right == tile.left:
+        self.tiles.append(Tile(tile.left, tile.right))
+        self.right = tile.right
+        return
+      elif self.right == tile.right:
+        self.tiles.append(Tile(tile.right, tile.left))
+        self.right = tile.left
+        return
     raise Exception('Cannot add tile to current board', str(tile), str(self))
 
   def __str__(self):
@@ -212,6 +213,4 @@ def gameTest():
   game.addPlayer(Player('Denny'))
   game.start()
 
-#gameTest() 
-tileUnicodeTest()
-
+gameTest() 
