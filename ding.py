@@ -134,6 +134,9 @@ class Player():
 
   def getTotalPoints(self):
     return sum([i.getPoints() for i in self.discards])
+
+  def getDiscardedTiles(self):
+    return self.discards
     
 class Game():
   """docstring for Game"""
@@ -177,7 +180,11 @@ class Game():
     points = []
     for player in self.players:
       point = player.getTotalPoints()
-      print player.name, point, 'points.'
+      tiles = player.getDiscardedTiles()
+      print player.name, 'discarded:',
+      for tile in tiles:
+        print unicode(tile),
+      print ' in total of', point, 'points.'
       points.append(point)
     min_point = min(points)
     max_point = max(points)
