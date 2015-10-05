@@ -156,6 +156,7 @@ class Game():
     for player in self.players:
       start = count * tilesNum
       end = start + 6
+      count += 1
       player.setHands([Tile.createsFrom(self.tileSet[i]) for i in a[start:end]])
 
   def start(self):
