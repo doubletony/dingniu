@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 def tileHash(points):
-  return points[0] * 100 + points[0]
+  return points[0] * 100 + points[1]
 
 TILE_UNICODE_MAP = {
+  # http://www.alanwood.net/unicode/domino-tiles.html
   tileHash([1, 1]) : 127033,
-  tileHash([1, 3]) : 127035, tileHash([3, 1]) : 127046,
+  tileHash([1, 3]) : 127035, tileHash([3, 1]) : 127047,
   tileHash([1, 5]) : 127037, tileHash([5, 1]) : 127061,
   tileHash([1, 6]) : 127038, tileHash([6, 1]) : 127068,
   tileHash([2, 2]) : 127041,
@@ -141,7 +142,7 @@ class Game():
     Tile(3, 3), Tile(3, 3), Tile(3, 6),
     Tile(4, 4), Tile(4, 4), Tile(4, 6), Tile(4, 6),
     Tile(5, 5), Tile(5, 5), Tile(5, 6), Tile(5, 6),
-    Tile(6, 6), Tile(6, 6),
+    Tile(6, 6), Tile(6, 6)
     ]
 
   def addPlayer(self, player):
@@ -167,6 +168,20 @@ class Game():
     for x in range(rounds):
       for player in self.players:
         player.deal(self.board)
+
+def tileUnicodeTest():
+  tiles = [
+  Tile(1, 1), Tile(1, 1), Tile(1, 3), Tile(1, 3),
+  Tile(1, 5), Tile(1, 5), Tile(1, 6), Tile(1, 6),
+  Tile(2, 2), Tile(2, 2), Tile(2, 6),
+  Tile(3, 3), Tile(3, 3), Tile(3, 6),
+  Tile(4, 4), Tile(4, 4), Tile(4, 6), Tile(4, 6),
+  Tile(5, 5), Tile(5, 5), Tile(5, 6), Tile(5, 6),
+  Tile(6, 6), Tile(6, 6)
+  ]
+  for tile in tiles:
+    print str(tile),
+    print unicode(tile), unicode(Tile(tile.right, tile.left))
 
 def playerTest():
   board = Board()
@@ -197,5 +212,6 @@ def gameTest():
   game.addPlayer(Player('Denny'))
   game.start()
 
-gameTest()
+#gameTest() 
+tileUnicodeTest()
 
