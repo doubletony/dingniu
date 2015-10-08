@@ -80,6 +80,7 @@ class Board():
   def __unicode__(self):
     s = u' '
     for i in self.tiles:
+      print i
       s = s + u' ' + unicode(i)
     return s
 
@@ -241,15 +242,14 @@ def playerTest():
 
 def boardTest():
   board = Board()
-  tiles = [Tile(1,2), Tile(1,4), Tile(1,6), Tile(4, 2)]
+  tiles = [Tile(1,3), Tile(1,3), Tile(1,6), Tile(3, 3)]
   board.add(True, tiles[0])
-  print str(board)
+  print unicode(board)
   board.add(True, tiles[2])
-  print str(board)
+  print unicode(board)
   board.add(False, tiles[3])
-  print str(board)
+  print unicode(board)
   board.add(False, tiles[1])
-  print str(board)
 
 def gameTest():
   game = Game()
@@ -259,4 +259,3 @@ def gameTest():
   game.addPlayer(Player('Denny'))
   game.start()
 
-gameTest() 
