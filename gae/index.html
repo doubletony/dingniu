@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  
+<style> 
+#board {
+    border: 3px solid black;
+    display: flex;
+}
+
+#player {
+    width: 100%;
+    display: -webkit-flex; /* Safari */
+    display: flex;
+}
+
+#player {
+    -webkit-flex: 1;  /* Safari 6.1+ */
+    -ms-flex: 1;  /* IE 10 */    
+    flex: 1;
+}
+
+.tile {
+  font-size: 40px;
+}
+</style>
+<script type="text/javascript">
+
+function createDealLink(div, button, url) {
+  return function() {
+    button.onclick = null;
+    var xmlhttp = new XMLHttpRequest();
+    xmlhttp.onreadystatechange = function() {
+      if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+        if (xmlhttp.responseText == 'error') {
+          alert('bad move!');
+        } else {
+          var pool = document.getElementById('tilepool');
+          pool.innerHTML = '<<<' + xmlhttp.responseText + '>>>';
+          var parent = div.parentNode;
+          parent.removeChild(div);
+        }
+      }
+    };
+    xmlhttp.open('GET', url, true);
+    xmlhttp.send();
+
+  }
+}
+
+function clickTile(div) {
+  var left = document.createElement('BUTTON');
+  left.appendChild(document.createTextNode('<<<'));
+  var right = document.createElement('BUTTON');
+  right.appendChild(document.createTextNode('>>>'));
+  var gameId = window.location.search.substring('?gameId='.length);
+  var tileNodes = div.parentNode.childNodes;
+  var tileId = -1;
+  for (var i = 0; i < tileNodes.length; i++) {
+    if (tileNodes[i].nodeName == 'DIV') {
+      tileId = tileId + 1;
+      if (div.id == tileNodes[i].id) {
+      break;
+      }
+    }
+  };
+  left.onclick = createDealLink(div, left, 
+    'API?action=deal&isLeft=1&gameId=' + gameId + '&tileId=' + tileId);
+  div.appendChild(left);
+
+  right.onclick = createDealLink(div, right, 
+    'API?action=deal&isLeft=0&gameId=' + gameId + '&tileId=' + tileId);
+  div.appendChild(right);
+  div.onclick = null;
+}
+
+function startGame(div) {
+  var xmlhttp = new XMLHttpRequest();
+  div.innerHTML = 'Generating a new game!'
+  xmlhttp.onreadystatechange = function() {
+    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+      setInterval(function() {
+        var gameId = xmlhttp.responseText;
+        var url = '?gameId=' + gameId;
+        var a = document.createElement('a');
+        a.href = url;
+        a.click();
+      }, 2000);
+    }
+  };
+  xmlhttp.open('GET', 'API?action=start', true);
+  xmlhttp.send();
+}
+</script>
+</head>
+
+  <body>
+    <button onclick='startGame(this)'>New game!</button>
+    <div id='board'>
+      <div class='tile' id='tilepool'> <<< {{tilepool}} >>> </div>
+    </div>
+
+    <div id='player'>
+      {% for tile in tile_in_hands %}
+        <div class='tile' onclick="clickTile(this)" id='tile{{loop.index0}}'>{{ tile }}</div>
+      {% endfor %}
+    </div>
+  </body>
+</html>
