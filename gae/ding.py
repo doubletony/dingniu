@@ -44,7 +44,10 @@ class Board():
     self.tiles = []
     self.left = 0
     self.right = 0
-      
+
+  def isAddable(self, tile):
+    return self.left == tile.left or self.left == tile.right or self.right == tile.left or self.right == tile.right
+
   def add(self, isLeft, tile):
     if self.left == 0:
       self.tiles.append(tile)
