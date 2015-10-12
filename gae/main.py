@@ -68,8 +68,8 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 
 class PlayerRecord(ndb.Model):
   name = ndb.StringProperty(indexed=False)
-  hands = ndb.StringProperty(indexed=False, repeated=True)
-  discards = ndb.StringProperty(indexed=False, repeated=True)
+  hands = ndb.JsonProperty(indexed=False)
+  discards = ndb.JsonProperty(indexed=False)
 
 def parsePlayerRecord(record):
   return parsePlayer(record.name, record.hands, record.discards)
@@ -77,8 +77,8 @@ def parsePlayerRecord(record):
 class GameRecord(ndb.Model):
   gameId = ndb.StringProperty(indexed=True)
   board = ndb.StringProperty(indexed=False)
-  cpus = ndb.JsonProperty(repeated=True)
   player = ndb.StructuredProperty(PlayerRecord)
+  players = ndb.StructuredProperty(PlayerRecord, repeated=True)
 
 def retriveGame(gameId):
   qry = GameRecord.query(GameRecord.gameId == gameId)
@@ -86,32 +86,44 @@ def retriveGame(gameId):
   if len(result) != 1:
     raise Exception('Faild to fetch game information.', str(len(result)))
   board = parseBoard(result[0].board)
-  cpus = [parseTiles(i) for i in result[0].cpus]
-  return board, cpus, parsePlayerRecord(result[0].player)
+  player = parsePlayerRecord(result[0].player)
+  players = [parsePlayerRecord(cpu) for cpu in result[0].players]
+  return board, player, players
 
 def createGame(gameId, board, hands, cpus):
   player = PlayerRecord(name='player', hands = hands, discards = [])
-  game = GameRecord(gameId = gameId, board = str(board), cpus = cpus, player = player)
+  players = []
+  for i in range(len(cpus)):
+    cpu = cpus[i]
+    players.append(PlayerRecord(name='CPU' + str(i + 1), hands = cpu, discards = []))
+  game = GameRecord(gameId = gameId, board = str(board), player = player, players = players)
   game.put()
 
-def updateGame(gameId, board, player, cpus):
+def updateGame(gameId, board, player, players):
   qry = GameRecord.query(GameRecord.gameId == gameId)
   result = qry.fetch(10)
   if len(result) != 1:
     raise Exception('Faild to fetch game information.', str(len(result)))
   result[0].player.hands = [str(tile) for tile in player.hands]
   result[0].player.discards = [str(tile) for tile in player.discards]
-  for cpu in cpus:
-    for i in range(len(cpu)):
-      if board.isAddable(cpu[i]):
+  for cpu in players:
+    added = False
+    for i in range(len(cpu.hands)):
+      if board.isAddable(cpu.hands[i]):
+        added = True
         try:
-          board.add(True, cpu[i])
+          board.add(True, cpu.hands[i])
         except Exception, e:
-          board.add(False, cpu[i])
-        cpu.pop(i)
+          board.add(False, cpu.hands[i])
+        cpu.hands.pop(i)
         break
+    if not added:
+      cpu.discards.append(cpu.hands.pop(i))
   result[0].board = str(board)
-  result[0].cpus = [[str(tile) for tile in cpu] for cpu in cpus]
+  for i in range(len(result[0].players)):
+    cpu = result[0].players[i]
+    cpu.hands = [str(tile) for tile in players[i].hands]
+    cpu.discards = [str(tile) for tile in players[i].discards]
   result[0].put()
 
 def display(item):
@@ -126,10 +138,9 @@ class MainPage(webapp2.RequestHandler):
         }
         gameId = self.request.get('gameId')
         if gameId != '':
-          board, cpus, player = retriveGame(gameId)
+          board, player, players = retriveGame(gameId)
           template_values['tilepool'] = display(board)
           template_values['tile_in_hands'] = [display(t) for t in player.hands]
-
         self.response.write(template.render(template_values))
 
 class API(webapp2.RequestHandler):
@@ -140,7 +151,7 @@ class API(webapp2.RequestHandler):
           gameId = self.request.get('gameId') # uuid
           isLeft = bool(self.request.get_range('isLeft'))
           tileId = self.request.get_range('tileId')
-          board, cpus, player = retriveGame(gameId)
+          board, player, players = retriveGame(gameId)
           isDiscard = bool(self.request.get_range('isDiscard'))
           try:
             if not isDiscard:
@@ -151,11 +162,11 @@ class API(webapp2.RequestHandler):
           except Exception, e:
             self.response.write('error')
           else:
-            updateGame(gameId, board, player, cpus)
+            updateGame(gameId, board, player, players)
             self.response.write(display(board))
         elif action == 'show':
           gameId = self.request.get('gameId')
-          board, cpus, player = retriveGame(gameId)
+          board, player, players = retriveGame(gameId)
           self.response.write(display(board) + display(player.hands))
         elif action == 'start':
           # this needs to be rewritten after testing is done.
