@@ -44,13 +44,14 @@ function createDealLink(div, button, url) {
     };
     xmlhttp.open('GET', url, true);
     xmlhttp.send();
-
   }
 }
 
 function clickTile(div) {
   var left = document.createElement('BUTTON');
   left.appendChild(document.createTextNode('<<<'));
+  var discard = document.createElement('BUTTON');
+  discard.appendChild(document.createTextNode('discard'));
   var right = document.createElement('BUTTON');
   right.appendChild(document.createTextNode('>>>'));
   var gameId = window.location.search.substring('?gameId='.length);
@@ -67,6 +68,10 @@ function clickTile(div) {
   left.onclick = createDealLink(div, left, 
     'API?action=deal&isLeft=1&gameId=' + gameId + '&tileId=' + tileId);
   div.appendChild(left);
+
+  discard.onclick = createDealLink(div, discard, 
+    'API?action=deal&isDiscard=1&gameId=' + gameId + '&tileId=' + tileId);
+  div.appendChild(discard);
 
   right.onclick = createDealLink(div, right, 
     'API?action=deal&isLeft=0&gameId=' + gameId + '&tileId=' + tileId);

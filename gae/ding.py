@@ -97,7 +97,9 @@ class Player():
   
   def setHands(self, tiles):
     self.hands = tiles
-    self.discards = []
+
+  def setDiscards(self, tiles):
+    self.discards = tiles
 
   """Given a board, with current hands, should be able to make a choice to change the board"""
   def deal(self, board):

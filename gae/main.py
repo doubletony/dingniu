@@ -46,8 +46,7 @@ def parseBoard(text):
     board.add(False, parseTile(tile))
   return board
 
-
-def parseHand(hands):
+def parseTiles(hands):
   tiles = []
   for tile in hands:
     if tile == '':
@@ -55,17 +54,31 @@ def parseHand(hands):
     tiles.append(parseTile(tile))
   return tiles
 
+def parsePlayer(name, hands, discards):
+  player = Player(name)
+  player.setHands(parseTiles(hands))
+  player.setDiscards(parseTiles(discards))
+  return player
+
 ### Starts App Engine Code
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
     extensions=['jinja2.ext.autoescape'],
     autoescape=True)
 
+class PlayerRecord(ndb.Model):
+  name = ndb.StringProperty(indexed=False)
+  hands = ndb.StringProperty(indexed=False, repeated=True)
+  discards = ndb.StringProperty(indexed=False, repeated=True)
+
+def parsePlayerRecord(record):
+  return parsePlayer(record.name, record.hands, record.discards)
+
 class GameRecord(ndb.Model):
   gameId = ndb.StringProperty(indexed=True)
   board = ndb.StringProperty(indexed=False)
-  hands = ndb.JsonProperty(indexed=False)
   cpus = ndb.JsonProperty(repeated=True)
+  player = ndb.StructuredProperty(PlayerRecord)
 
 def retriveGame(gameId):
   qry = GameRecord.query(GameRecord.gameId == gameId)
@@ -73,20 +86,21 @@ def retriveGame(gameId):
   if len(result) != 1:
     raise Exception('Faild to fetch game information.', str(len(result)))
   board = parseBoard(result[0].board)
-  hands = parseHand(result[0].hands)
-  cpus = [parseHand(i) for i in result[0].cpus]
-  return board, hands, cpus
+  cpus = [parseTiles(i) for i in result[0].cpus]
+  return board, cpus, parsePlayerRecord(result[0].player)
 
 def createGame(gameId, board, hands, cpus):
-  game = GameRecord(gameId = gameId, board = str(board), hands = hands, cpus = cpus)
+  player = PlayerRecord(name='player', hands = hands, discards = [])
+  game = GameRecord(gameId = gameId, board = str(board), cpus = cpus, player = player)
   game.put()
 
-def updateGame(gameId, board, hands, cpus):
+def updateGame(gameId, board, player, cpus):
   qry = GameRecord.query(GameRecord.gameId == gameId)
   result = qry.fetch(10)
   if len(result) != 1:
     raise Exception('Faild to fetch game information.', str(len(result)))
-  result[0].hands = [str(tile) for tile in hands]
+  result[0].player.hands = [str(tile) for tile in player.hands]
+  result[0].player.discards = [str(tile) for tile in player.discards]
   for cpu in cpus:
     for i in range(len(cpu)):
       if board.isAddable(cpu[i]):
@@ -103,7 +117,6 @@ def updateGame(gameId, board, hands, cpus):
 def display(item):
   return str(item)
 
-
 class MainPage(webapp2.RequestHandler):
     def get(self):
         template = JINJA_ENVIRONMENT.get_template('index.html')
@@ -113,9 +126,9 @@ class MainPage(webapp2.RequestHandler):
         }
         gameId = self.request.get('gameId')
         if gameId != '':
-          board, hands, cpus = retriveGame(gameId)
+          board, cpus, player = retriveGame(gameId)
           template_values['tilepool'] = display(board)
-          template_values['tile_in_hands'] = [display(t) for t in hands]
+          template_values['tile_in_hands'] = [display(t) for t in player.hands]
 
         self.response.write(template.render(template_values))
 
@@ -127,20 +140,23 @@ class API(webapp2.RequestHandler):
           gameId = self.request.get('gameId') # uuid
           isLeft = bool(self.request.get_range('isLeft'))
           tileId = self.request.get_range('tileId')
-          board, hands, cpus = retriveGame(gameId)
+          board, cpus, player = retriveGame(gameId)
+          isDiscard = bool(self.request.get_range('isDiscard'))
           try:
-            board.add(isLeft, hands[tileId])
-            pass
+            if not isDiscard:
+              board.add(isLeft, player.hands[tileId])
+              player.hands.pop(tileId)
+            else:
+              player.discards.append(player.hands.pop(tileId))
           except Exception, e:
             self.response.write('error')
           else:
-            hands.pop(tileId)
-            updateGame(gameId, board, hands, cpus)
+            updateGame(gameId, board, player, cpus)
             self.response.write(display(board))
         elif action == 'show':
           gameId = self.request.get('gameId')
-          board, hands, cpus = retriveGame(gameId)
-          self.response.write(display(board) + display(hands))
+          board, cpus, player = retriveGame(gameId)
+          self.response.write(display(board) + display(player.hands))
         elif action == 'start':
           # this needs to be rewritten after testing is done.
           board = Board()
