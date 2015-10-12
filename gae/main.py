@@ -156,16 +156,16 @@ def getGameResults(players):
   for player in players:
     point = player.getTotalPoints()
     if point == max_point:
-      result = result + player.name + ' loses $ ' + str(BIG_PENALTY) + '\n'
+      result = result + player.name + ' loses $ ' + str(BIG_PENALTY) + ' Discard: ' + str(point) + ' points. ' + str([str(tile) for tile in player.discards]) + '\n'
     elif point > min_point:
-      result = result + player.name + ' loses $ ' + str(SMALL_PENALTY) + '\n'
+      result = result + player.name + ' loses $ ' + str(SMALL_PENALTY) + ' Discard: ' + str(point) + ' points. ' + str([str(tile) for tile in player.discards]) + '\n'
     else:
       # winner
-      result = result + player.name + ' wins $ ' + str(total_award / winner_count) + '\n'
+      result = result + player.name + ' wins $ ' + str(total_award / winner_count) + ' Discard: ' + str(point) + ' points. ' + str([str(tile) for tile in player.discards]) + '\n'
   return result
 
 def display(item):
-  return str(item)
+  return unicode(item)
 
 class MainPage(webapp2.RequestHandler):
     def get(self):
