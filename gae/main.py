@@ -164,8 +164,10 @@ def getGameResults(players):
       result = result + player.name + ' wins $ ' + str(total_award / winner_count) + ' Discard: ' + str(point) + ' points. ' + str([str(tile) for tile in player.discards]) + '\n'
   return result
 
+DEPLOY_FOR_MOBILE = False
+
 def display(item):
-  return unicode(item)
+  return str(item) if DEPLOY_FOR_MOBILE else unicode(item)
 
 class MainPage(webapp2.RequestHandler):
     def get(self):
@@ -173,6 +175,7 @@ class MainPage(webapp2.RequestHandler):
         template_values = {
           'tilepool': 'Start a new game!',
           'tile_in_hands': [],
+          'mobileSite': DEPLOY_FOR_MOBILE,
         }
         gameId = self.request.get('gameId')
         if gameId != '':

@@ -107,7 +107,11 @@ function startGame(div) {
 
   <body>
     <button onclick='startGame(this)'>New game!</button>
-    <a href="http://dingdiu-ddd-mobile.appspot.com">Not seeing tile? Go to text version!</a>
+    {% if mobileSite %}
+    <a href="http://dingniu-ddd.appspot.com">Try fancy tiles? Go to full version!</a>
+    {% else %}
+    <a href="http://dingniu-ddd-mobile.appspot.com">No tile after clicking? Go to text version!</a>
+    {% endif %}
     <div id='board'>
       <div class='tile' id='tilepool'> <<< {{tilepool}} >>> </div>
     </div>
