@@ -161,7 +161,7 @@ def getGameResults(players):
       result = result + player.name + ' loses $ ' + str(SMALL_PENALTY) + ' Discard: ' + str(point) + ' points. ' + str([str(tile) for tile in player.discards]) + '\n'
     else:
       # winner
-      result = result + player.name + ' wins $ ' + str(total_award / winner_count) + ' Discard: ' + str(point) + ' points. ' + str([str(tile) for tile in player.discards]) + '\n'
+      result = result + player.name + ' wins $ ' + str(total_award * 1.0 / winner_count) + ' Discard: ' + str(point) + ' points. ' + str([str(tile) for tile in player.discards]) + '\n'
   return result
 
 DEPLOY_FOR_MOBILE = False
