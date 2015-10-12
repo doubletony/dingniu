@@ -100,6 +100,10 @@ def updateGame(gameId, board, hands, cpus):
   result[0].cpus = [[str(tile) for tile in cpu] for cpu in cpus]
   result[0].put()
 
+def display(item):
+  return str(item)
+
+
 class MainPage(webapp2.RequestHandler):
     def get(self):
         template = JINJA_ENVIRONMENT.get_template('index.html')
@@ -110,8 +114,8 @@ class MainPage(webapp2.RequestHandler):
         gameId = self.request.get('gameId')
         if gameId != '':
           board, hands, cpus = retriveGame(gameId)
-          template_values['tilepool'] = unicode(board)
-          template_values['tile_in_hands'] = [unicode(t) for t in hands]
+          template_values['tilepool'] = display(board)
+          template_values['tile_in_hands'] = [display(t) for t in hands]
 
         self.response.write(template.render(template_values))
 
@@ -132,11 +136,11 @@ class API(webapp2.RequestHandler):
           else:
             hands.pop(tileId)
             updateGame(gameId, board, hands, cpus)
-            self.response.write(unicode(board))
+            self.response.write(display(board))
         elif action == 'show':
           gameId = self.request.get('gameId')
           board, hands, cpus = retriveGame(gameId)
-          self.response.write(unicode(board) + unicode(hands))
+          self.response.write(display(board) + display(hands))
         elif action == 'start':
           # this needs to be rewritten after testing is done.
           board = Board()
