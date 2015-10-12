@@ -4,8 +4,9 @@
   
 <style> 
 #board {
-    border: 3px solid black;
-    display: flex;
+  width: 500px;
+  border: 3px solid black;
+  display: flex;
 }
 
 #player {
@@ -39,6 +40,13 @@ function createDealLink(div, button, url) {
           var responseData = JSON.parse(xmlhttp.responseText);
           pool.innerHTML = '<<<' + responseData['board'] + '>>>';
           var parent = div.parentNode;
+          var choices = responseData['choices'];
+          var cpu1 = document.getElementById('cpu1');
+          var cpu2 = document.getElementById('cpu2');
+          var cpu3 = document.getElementById('cpu3');
+          cpu1.innerHTML = 'CPU1 ' + choices[0];
+          cpu2.innerHTML = 'CPU2 ' + choices[1];
+          cpu3.innerHTML = 'CPU3 ' + choices[2];
 
           if (responseData.hasOwnProperty('result')) {
             var result = document.getElementById('result');
@@ -112,16 +120,45 @@ function startGame(div) {
     {% else %}
     <a href="http://dingniu-ddd-mobile.appspot.com">No tile after clicking? Go to text version!</a>
     {% endif %}
-    <div id='board'>
+
+    <table>
+    <tr>
+      <td></td>  <td style="background-color:Green">
+        <div class='tile' id='cpu2'>
+          CPU2
+        </div>
+      </td>  <td></td>
+    </tr>
+    <tr>
+      <td style="background-color:DarkOrange">
+        <div class='tile' id='cpu3'>
+          CPU3
+        </div>
+      </td> <td>
+            <div id='board'>
       <div class='tile' id='tilepool'> <<< {{tilepool}} >>> </div>
     </div>
+      </td>
 
-    <div id='player'>
-      {% for tile in tile_in_hands %}
-        <div class='tile' onclick="clickTile(this)" id='tile{{loop.index0}}'>{{ tile }}</div>
+      <td style="background-color:Red">
+        <div class='tile' id='cpu1'>
+          CPU1
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td></td> 
+      <td>
+        <div id='player'>
+        {% for tile in tile_in_hands %}
+        <div class='tile' onclick="clickTile(this)" id='tile{{loop.index0}}'>{{ tile }}
+        </div>
       {% endfor %}
-    </div>
-
+      </div>
+      </td> 
+      <td></td>
+    </tr>
+   </table>
     <div id='result'>
     </div>
   </body>

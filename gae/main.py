@@ -93,7 +93,7 @@ def createGame(gameId, board, allhands):
   players = []
   for i in range(len(allhands)):
     hands = allhands[i]
-    players.append(PlayerRecord(name='CPU' + str(i + 1), hands = hands, discards = []))
+    players.append(PlayerRecord(name='CPU' + str(i), hands = hands, discards = []))
   players[0].name = 'player'
   game = GameRecord(gameId = gameId, board = str(board), players = players)
   game.put()
@@ -105,6 +105,7 @@ def updateGame(gameId, board, player, competitors):
     raise Exception('Faild to fetch game information.', str(len(result)))
   result[0].players[0].hands = [str(tile) for tile in player.hands]
   result[0].players[0].discards = [str(tile) for tile in player.discards]
+  choices = []
   for cpu in competitors:
     added = False
     for i in range(len(cpu.hands)):
@@ -114,16 +115,20 @@ def updateGame(gameId, board, player, competitors):
           board.add(True, cpu.hands[i])
         except Exception, e:
           board.add(False, cpu.hands[i])
+        choices.append(display(cpu.hands[i]))
         cpu.hands.pop(i)
         break
     if not added:
-      cpu.discards.append(cpu.hands.pop(i))
+      choices.append('discard')
+      cpu.discards.append(cpu.hands.pop(0))
+
   result[0].board = str(board)
   for i in range(len(competitors)):
     cpu = result[0].players[i + 1]
     cpu.hands = [str(tile) for tile in competitors[i].hands]
     cpu.discards = [str(tile) for tile in competitors[i].discards]
   result[0].put()
+  return choices
 
 def getGameResults(players):
   points = []
@@ -205,12 +210,13 @@ class API(webapp2.RequestHandler):
           except Exception, e:
             self.response.write('error')
           else:
-            updateGame(gameId, board, player, players)
+            choices = updateGame(gameId, board, player, players)
             responseObj['board'] = display(board)
             print "player hands:", len(player.hands)
             if len(player.hands) == 0:
               responseObj['result'] = getGameResults([player] + players)
               print responseObj['result']
+            responseObj['choices'] = choices
             self.response.write(json.dumps(responseObj))
         elif action == 'show':
           gameId = self.request.get('gameId')
