@@ -36,8 +36,14 @@ function createDealLink(div, button, url) {
           alert('bad move!');
         } else {
           var pool = document.getElementById('tilepool');
-          pool.innerHTML = '<<<' + xmlhttp.responseText + '>>>';
+          var responseData = JSON.parse(xmlhttp.responseText);
+          pool.innerHTML = '<<<' + responseData['board'] + '>>>';
           var parent = div.parentNode;
+
+          if (responseData.hasOwnProperty('result')) {
+            var result = document.getElementById('result');
+            result.innerHTML = responseData['result'].replace(/(\r\n|\n|\r)/gm, "<br>");
+          };
           parent.removeChild(div);
         }
       }
@@ -109,6 +115,9 @@ function startGame(div) {
       {% for tile in tile_in_hands %}
         <div class='tile' onclick="clickTile(this)" id='tile{{loop.index0}}'>{{ tile }}</div>
       {% endfor %}
+    </div>
+
+    <div id='result'>
     </div>
   </body>
 </html>

@@ -1,4 +1,5 @@
 import jinja2
+import json
 import os
 import urllib
 import uuid
@@ -124,6 +125,45 @@ def updateGame(gameId, board, player, competitors):
     cpu.discards = [str(tile) for tile in competitors[i].discards]
   result[0].put()
 
+def getGameResults(players):
+  points = []
+  result = ''
+  for player in players:
+    point = player.getTotalPoints()
+    tiles = player.getDiscardedTiles()
+    points.append(point)
+
+  min_point = min(points)
+  max_point = max(points)
+  if min_point == max_point:
+    return 'Draw! Everyone is winner!'
+  total_award = 0
+  BIG_PENALTY = 2
+  SMALL_PENALTY = 1
+  winner_count = 0
+  # Calculate the award amount
+  for player in players:
+    point = player.getTotalPoints()
+    if point == max_point:
+      total_award += BIG_PENALTY
+    elif point > min_point:
+      total_award += SMALL_PENALTY
+    else:
+      # winner
+      winner_count += 1
+
+  # Assign the awards and penalty
+  for player in players:
+    point = player.getTotalPoints()
+    if point == max_point:
+      result = result + player.name + ' loses $ ' + str(BIG_PENALTY) + '\n'
+    elif point > min_point:
+      result = result + player.name + ' loses $ ' + str(SMALL_PENALTY) + '\n'
+    else:
+      # winner
+      result = result + player.name + ' wins $ ' + str(total_award / winner_count) + '\n'
+  return result
+
 def display(item):
   return str(item)
 
@@ -146,6 +186,8 @@ class API(webapp2.RequestHandler):
         action = str(self.request.get('action'))
         print self.request.get_range('isLeft')
         if action == 'deal':
+          self.response.headers['Content-Type'] = 'application/json'
+          responseObj = {}
           gameId = self.request.get('gameId') # uuid
           isLeft = bool(self.request.get_range('isLeft'))
           tileId = self.request.get_range('tileId')
@@ -161,7 +203,12 @@ class API(webapp2.RequestHandler):
             self.response.write('error')
           else:
             updateGame(gameId, board, player, players)
-            self.response.write(display(board))
+            responseObj['board'] = display(board)
+            print "player hands:", len(player.hands)
+            if len(player.hands) == 0:
+              responseObj['result'] = getGameResults([player] + players)
+              print responseObj['result']
+            self.response.write(json.dumps(responseObj))
         elif action == 'show':
           gameId = self.request.get('gameId')
           board, player, players = retriveGame(gameId)
