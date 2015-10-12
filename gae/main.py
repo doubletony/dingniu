@@ -77,7 +77,6 @@ def parsePlayerRecord(record):
 class GameRecord(ndb.Model):
   gameId = ndb.StringProperty(indexed=True)
   board = ndb.StringProperty(indexed=False)
-  player = ndb.StructuredProperty(PlayerRecord)
   players = ndb.StructuredProperty(PlayerRecord, repeated=True)
 
 def retriveGame(gameId):
@@ -86,27 +85,26 @@ def retriveGame(gameId):
   if len(result) != 1:
     raise Exception('Faild to fetch game information.', str(len(result)))
   board = parseBoard(result[0].board)
-  player = parsePlayerRecord(result[0].player)
   players = [parsePlayerRecord(cpu) for cpu in result[0].players]
-  return board, player, players
+  return board, players[0], players[1:]
 
-def createGame(gameId, board, hands, cpus):
-  player = PlayerRecord(name='player', hands = hands, discards = [])
+def createGame(gameId, board, allhands):
   players = []
-  for i in range(len(cpus)):
-    cpu = cpus[i]
-    players.append(PlayerRecord(name='CPU' + str(i + 1), hands = cpu, discards = []))
-  game = GameRecord(gameId = gameId, board = str(board), player = player, players = players)
+  for i in range(len(allhands)):
+    hands = allhands[i]
+    players.append(PlayerRecord(name='CPU' + str(i + 1), hands = hands, discards = []))
+  players[0].name = 'player'
+  game = GameRecord(gameId = gameId, board = str(board), players = players)
   game.put()
 
-def updateGame(gameId, board, player, players):
+def updateGame(gameId, board, player, competitors):
   qry = GameRecord.query(GameRecord.gameId == gameId)
   result = qry.fetch(10)
   if len(result) != 1:
     raise Exception('Faild to fetch game information.', str(len(result)))
-  result[0].player.hands = [str(tile) for tile in player.hands]
-  result[0].player.discards = [str(tile) for tile in player.discards]
-  for cpu in players:
+  result[0].players[0].hands = [str(tile) for tile in player.hands]
+  result[0].players[0].discards = [str(tile) for tile in player.discards]
+  for cpu in competitors:
     added = False
     for i in range(len(cpu.hands)):
       if board.isAddable(cpu.hands[i]):
@@ -120,10 +118,10 @@ def updateGame(gameId, board, player, players):
     if not added:
       cpu.discards.append(cpu.hands.pop(i))
   result[0].board = str(board)
-  for i in range(len(result[0].players)):
-    cpu = result[0].players[i]
-    cpu.hands = [str(tile) for tile in players[i].hands]
-    cpu.discards = [str(tile) for tile in players[i].discards]
+  for i in range(len(competitors)):
+    cpu = result[0].players[i + 1]
+    cpu.hands = [str(tile) for tile in competitors[i].hands]
+    cpu.discards = [str(tile) for tile in competitors[i].discards]
   result[0].put()
 
 def display(item):
@@ -173,10 +171,8 @@ class API(webapp2.RequestHandler):
           board = Board()
           gameId = str(uuid.uuid1())
           playersHands = shuffleTiles(4)
-          hands = [str(tile) for tile in playersHands[0]]
-          playersHands.pop(0)
-          cpus = [[str(tile) for tile in cpu] for cpu in playersHands]
-          createGame(gameId, board, hands, cpus)
+          allhands = [[str(tile) for tile in hands] for hands in playersHands]
+          createGame(gameId, board, allhands)
           self.response.write(gameId + ' ' + str(board))
 
 app = webapp2.WSGIApplication([
