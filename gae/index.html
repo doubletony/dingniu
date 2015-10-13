@@ -24,8 +24,24 @@
 .tile {
   font-size: 40px;
 }
+
+.tileVisual {
+  margin: 5px;
+}
 </style>
+<script type="text/javascript" src="js/tile.js"> </script>
 <script type="text/javascript">
+
+
+function reRender() {
+  var tileVisDivs = document.getElementsByClassName('tileVisual');
+  for (var i = 0; i < tileVisDivs.length; i++) {
+    var tileStr = tileVisDivs[i].innerHTML.trim();
+    var tile = [parseInt(tileStr[1]), parseInt(tileStr[3])];
+    tileVisDivs[i].innerHTML = '';
+    tileVisDivs[i].appendChild(createTile(tile, 5));
+  };
+}
 
 function createDealLink(div, button, url) {
   return function() {
@@ -110,6 +126,10 @@ function startGame(div) {
   xmlhttp.open('GET', 'API?action=start', true);
   xmlhttp.send();
 }
+
+window.onload = function() {
+  reRender();
+}
 </script>
 </head>
 
@@ -151,7 +171,10 @@ function startGame(div) {
       <td>
         <div id='player'>
         {% for tile in tile_in_hands %}
-        <div class='tile' onclick="clickTile(this)" id='tile{{loop.index0}}'>{{ tile }}
+        <div class='tile' onclick="clickTile(this)" id='tile{{loop.index0}}'>
+          <div class='tileVisual'>
+            {{ tile }}
+          </div>
         </div>
       {% endfor %}
       </div>

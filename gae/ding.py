@@ -263,4 +263,3 @@ def gameTest():
   game.addPlayer(Player('Colly'))
   game.addPlayer(Player('Denny'))
   game.start()
-

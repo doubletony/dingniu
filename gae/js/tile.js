@@ -39,7 +39,7 @@ tileToDots[tileHash([6,6])] = 'rwr-wrw' + 'wrw-rwr';
  * @returns A div element that contains the rendered tile.
  */
 
-CreateTile = function(tile, size){
+createTile = function(tile, size){
   var div = document.createElement('div');
   var canvas = document.createElement('canvas');
   var width = 9 * size;
@@ -105,6 +105,6 @@ BoardRender = function(div){
 };
 
 BoardRender.prototype.add = function(isLeft, tile){
-  var tile = CreateTile(tile, 6);
+  var tile = createTile(tile, 6);
   this.div.appendChild(tile);
 };
