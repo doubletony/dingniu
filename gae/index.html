@@ -9,18 +9,21 @@
   display: flex;
 }
 
-#player {
-    width: 100%;
-    display: -webkit-flex; /* Safari */
-    display: flex;
+#player{
+  width: 100%;
+  display: -webkit-flex; /* Safari */
+  display: flex;
+  -webkit-flex: 1;  /* Safari 6.1+ */
+  -ms-flex: 1;  /* IE 10 */    
+  flex: 1;
 }
 
-#player {
-    -webkit-flex: 1;  /* Safari 6.1+ */
-    -ms-flex: 1;  /* IE 10 */    
-    flex: 1;
+#cpu1, #cpu2, #cpu3 {
+  width: auto;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
 }
-
 .tile {
   font-size: 40px;
 }
@@ -32,14 +35,22 @@
 <script type="text/javascript" src="js/tile.js"> </script>
 <script type="text/javascript">
 
+var TILE_SIZE = 5;
 
-function reRender() {
-  var tileVisDivs = document.getElementsByClassName('tileVisual');
+function parseTile(tileStr) {
+  var tileStr = tileStr.trim();
+  if (isNaN(parseInt(tileStr[1]))) {
+    return [0, 0];
+  };
+  return [parseInt(tileStr[1]), parseInt(tileStr[3])];
+}
+
+function reRenderTiles(classname) {
+  var tileVisDivs = document.getElementsByClassName(classname);
   for (var i = 0; i < tileVisDivs.length; i++) {
-    var tileStr = tileVisDivs[i].innerHTML.trim();
-    var tile = [parseInt(tileStr[1]), parseInt(tileStr[3])];
+    var tile = parseTile(tileVisDivs[i].innerHTML);
     tileVisDivs[i].innerHTML = '';
-    tileVisDivs[i].appendChild(createTile(tile, 5));
+    tileVisDivs[i].appendChild(createTile(tile, TILE_SIZE));
   };
 }
 
@@ -60,9 +71,12 @@ function createDealLink(div, button, url) {
           var cpu1 = document.getElementById('cpu1');
           var cpu2 = document.getElementById('cpu2');
           var cpu3 = document.getElementById('cpu3');
-          cpu1.innerHTML = 'CPU1 ' + choices[0];
-          cpu2.innerHTML = 'CPU2 ' + choices[1];
-          cpu3.innerHTML = 'CPU3 ' + choices[2];
+          cpu1.innerHTML = 'CPU1 ';
+          cpu1.appendChild(createTile(parseTile(choices[0]), 3));
+          cpu2.innerHTML = 'CPU2 ';
+          cpu2.appendChild(createTile(parseTile(choices[1]), 3));
+          cpu3.innerHTML = 'CPU3 ';
+          cpu3.appendChild(createTile(parseTile(choices[2]), 3));
 
           if (responseData.hasOwnProperty('result')) {
             var result = document.getElementById('result');
@@ -128,7 +142,7 @@ function startGame(div) {
 }
 
 window.onload = function() {
-  reRender();
+  reRenderTiles('tile-in-hand');
 }
 </script>
 </head>
@@ -172,7 +186,7 @@ window.onload = function() {
         <div id='player'>
         {% for tile in tile_in_hands %}
         <div class='tile' onclick="clickTile(this)" id='tile{{loop.index0}}'>
-          <div class='tileVisual'>
+          <div class='tile-in-hand'>
             {{ tile }}
           </div>
         </div>

@@ -10,6 +10,7 @@ var tileHash = function(tile) {
 }
 
 var tileToDots = {};
+tileToDots[tileHash([0,0])] = '-------' + '-------';
 tileToDots[tileHash([1,1])] = '---r---' + '---r---';
 tileToDots[tileHash([1,3])] = '---r---' + '-w-w-w-';
 tileToDots[tileHash([1,5])] = '---r---' + 'ww-w-ww';
