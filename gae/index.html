@@ -23,7 +23,7 @@
   margin-right: auto;
 }
 .tile {
-  font-size: 40px;
+  font-size: 24px;
 }
 
 .tileVisual {
@@ -33,8 +33,8 @@
 <script type="text/javascript" src="js/tile.js"> </script>
 <script type="text/javascript">
 
-var TILE_SIZE = 5;
-
+var TILE_IN_HAND_SIZE = 5;
+var TILE_IN_POOL_SIZE = 3;
 /**
  * @param {string} tileStr - The tile in string format. Parsable. '|1 3|'
  *                           and '1 3', but not '||1 3||'.
@@ -55,7 +55,22 @@ function reRenderTiles(classname) {
   for (var i = 0; i < tileVisDivs.length; i++) {
     var tile = parseTile(tileVisDivs[i].innerHTML);
     tileVisDivs[i].innerHTML = '';
-    tileVisDivs[i].appendChild(createTile(tile, TILE_SIZE));
+    tileVisDivs[i].appendChild(createTile(tile, TILE_IN_HAND_SIZE));
+  };
+}
+
+function reRenderBoard() {
+  var poolDiv = document.getElementById('tilepool');
+  var boardStr = poolDiv.innerHTML.trim();
+  boardStr = boardStr.substring(1, boardStr.length - 1);
+  var boardTiles = boardStr.split('||');
+  poolDiv.innerHTML='';
+  for (var i = 0; i < boardTiles.length; i++) {
+    if (boardTiles[i] == '') {
+      continue;
+    };
+    var tileDiv = createTile(parseTile(boardTiles[i]), TILE_IN_POOL_SIZE);
+    poolDiv.appendChild(tileDiv);
   };
 }
 
@@ -70,25 +85,8 @@ function createDealLink(div, button, url) {
         } else {
           var pool = document.getElementById('tilepool');
           var responseData = JSON.parse(xmlhttp.responseText);
-          // pool.innerHTML = '<<<' + responseData['board'] + '>>>';
-
-          pool.innerHTML = '';
-          var leftInsert = document.createTextNode('<<<');
-          pool.appendChild(leftInsert);
-
-          var boardStr = responseData['board'];
-          boardStr = boardStr.substring(1, boardStr.length - 1);
-          var boardTiles = boardStr.split('||');
-          var boardDiv = document.createElement('DIV');
-          for (var i = 0; i < boardTiles.length; i++) {
-            var tileDiv = createTile(parseTile(boardTiles[i]), 2);
-            boardDiv.appendChild(tileDiv);
-          };
-          boardDiv.style.transform = 'rotate('+90+'deg)'; 
-          pool.appendChild(boardDiv);
-          var rightInsert = document.createTextNode('>>>');
-          pool.appendChild(rightInsert);
-
+          pool.innerHTML = responseData['board'];
+          reRenderBoard();
           var parent = div.parentNode;
           var choices = responseData['choices'];
           var cpu1 = document.getElementById('cpu1');
@@ -97,7 +95,9 @@ function createDealLink(div, button, url) {
           cpu1.innerHTML = 'CPU1 ';
           cpu1.appendChild(createTile(parseTile(choices[0]), 3));
           cpu2.innerHTML = 'CPU2 ';
-          cpu2.appendChild(createTile(parseTile(choices[1]), 3));
+          var cpu2tileDiv = createTile(parseTile(choices[1]), 3);
+          cpu2tileDiv.style.transform = 'rotate('+90+'deg)';
+          cpu2.appendChild(cpu2tileDiv);
           cpu3.innerHTML = 'CPU3 ';
           cpu3.appendChild(createTile(parseTile(choices[2]), 3));
 
@@ -166,6 +166,7 @@ function startGame(div) {
 
 window.onload = function() {
   reRenderTiles('tile-in-hand');
+  reRenderBoard();
 }
 </script>
 </head>
@@ -180,24 +181,26 @@ window.onload = function() {
 
     <table>
     <tr>
-      <td></td>  <td style="background-color:Green">
+      <td></td>  <td>
         <div class='tile' id='cpu2'>
           CPU2
         </div>
       </td>  <td></td>
     </tr>
     <tr>
-      <td style="background-color:DarkOrange">
+      <td>
         <div class='tile' id='cpu3'>
           CPU3
         </div>
       </td> <td>
-            <div id='board'>
-      <div class='tile' id='tilepool'> <<< {{tilepool}} >>> </div>
-    </div>
+      <div id='board'>
+        <<<
+        <div class='tile-pool' id='tilepool'>  {{tilepool}}  </div>
+        >>>
+      </div>
       </td>
 
-      <td style="background-color:Red">
+      <td>
         <div class='tile' id='cpu1'>
           CPU1
         </div>
