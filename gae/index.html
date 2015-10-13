@@ -5,8 +5,6 @@
 <style> 
 #board {
   width: 500px;
-  border: 3px solid black;
-  display: flex;
 }
 
 #player{
@@ -37,12 +35,19 @@
 
 var TILE_SIZE = 5;
 
+/**
+ * @param {string} tileStr - The tile in string format. Parsable. '|1 3|'
+ *                           and '1 3', but not '||1 3||'.
+ */
 function parseTile(tileStr) {
   var tileStr = tileStr.trim();
-  if (isNaN(parseInt(tileStr[1]))) {
+  if (tileStr[0] == '|') {
+    tileStr = tileStr.substring(1, tileStr.length - 1);
+  };
+  if (isNaN(parseInt(tileStr[0]))) {
     return [0, 0];
   };
-  return [parseInt(tileStr[1]), parseInt(tileStr[3])];
+  return [parseInt(tileStr[0]), parseInt(tileStr[2])];
 }
 
 function reRenderTiles(classname) {
@@ -65,7 +70,25 @@ function createDealLink(div, button, url) {
         } else {
           var pool = document.getElementById('tilepool');
           var responseData = JSON.parse(xmlhttp.responseText);
-          pool.innerHTML = '<<<' + responseData['board'] + '>>>';
+          // pool.innerHTML = '<<<' + responseData['board'] + '>>>';
+
+          pool.innerHTML = '';
+          var leftInsert = document.createTextNode('<<<');
+          pool.appendChild(leftInsert);
+
+          var boardStr = responseData['board'];
+          boardStr = boardStr.substring(1, boardStr.length - 1);
+          var boardTiles = boardStr.split('||');
+          var boardDiv = document.createElement('DIV');
+          for (var i = 0; i < boardTiles.length; i++) {
+            var tileDiv = createTile(parseTile(boardTiles[i]), 2);
+            boardDiv.appendChild(tileDiv);
+          };
+          boardDiv.style.transform = 'rotate('+90+'deg)'; 
+          pool.appendChild(boardDiv);
+          var rightInsert = document.createTextNode('>>>');
+          pool.appendChild(rightInsert);
+
           var parent = div.parentNode;
           var choices = responseData['choices'];
           var cpu1 = document.getElementById('cpu1');
