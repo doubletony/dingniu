@@ -169,7 +169,7 @@ def getGameResults(players):
       result = result + player.name + ' wins $ ' + str(total_award * 1.0 / winner_count) + ' Discard: ' + str(point) + ' points. ' + str([str(tile) for tile in player.discards]) + '\n'
   return result
 
-DEPLOY_FOR_MOBILE = False
+DEPLOY_FOR_MOBILE = True
 
 def display(item):
   return str(item) if DEPLOY_FOR_MOBILE else unicode(item)
