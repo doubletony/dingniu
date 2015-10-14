@@ -129,6 +129,7 @@ def updateGame(gameId, board, player, competitors):
     cpu = result[0].players[i + 1]
     cpu.hands = [str(tile) for tile in competitors[i].hands]
     cpu.discards = [str(tile) for tile in competitors[i].discards]
+    choices[i].append(len(competitors[i].discards))
   result[0].put()
   return choices
 
