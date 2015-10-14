@@ -39,25 +39,32 @@ tileToDots[tileHash([6,6])] = 'rwr-wrw' + 'wrw-rwr';
  * @param {number} size - The size in px of the tile's width.
  * @returns A div element that contains the rendered tile.
  */
-
-createTile = function(tile, size){
+createTile = function(tile, size, isRotate){
   var div = document.createElement('div');
   var canvas = document.createElement('canvas');
   var width = 9 * size;
   var height = 20 * size;
   var round = 1 * size;
   div.appendChild(canvas);
-  canvas.width = width;
-  canvas.height = height;
+  if (isRotate){
+    canvas.width = height;
+    canvas.height = width;
+    div.style.width = height + 'px';
+    div.style.height = width + 'px';
+  } else {
+    canvas.width = width;
+    canvas.height = height;
+    div.style.width = width + 'px';
+    div.style.height = height + 'px';
+  };
 
-  div.style.width = width + 'px';
-  div.style.height = height + 'px';
+
   div.style.backgroundColor = 'black';
   div.style.borderRadius = round + 'px';
 
   var context = canvas.getContext('2d');
-  var baseX = canvas.width / 10;
-  var baseY = canvas.height / 10;
+  var baseX = width / 10;
+  var baseY = height / 10;
   var radius = size * 1.4;
 
   var dots = [];
@@ -81,18 +88,22 @@ createTile = function(tile, size){
   dots.push([ 3 * baseX, 8.8 * baseY]);
   dots.push([ 7 * baseX, 8.8 * baseY]);
 
-  var drawDot = function(id, color) {
-    drawCircle(context, dots[id][0], dots[id][1], radius, color);
+  var drawDot = function(id, color, isRotate) {
+    if (isRotate) {
+      drawCircle(context, dots[id][1], dots[id][0], radius, color);
+    } else {
+      drawCircle(context, dots[id][0], dots[id][1], radius, color);
+    };
   }
 
   var tileDots = tileToDots[tileHash(tile)];
   for (var i = 0; i < dots.length; i++) {
     switch(tileDots[i]) {
       case 'w':
-        drawDot(i, 'white');
+        drawDot(i, 'white', isRotate);
         break;
       case 'r':
-        drawDot(i, 'OrangeRed');
+        drawDot(i, 'OrangeRed', isRotate);
         break;
       default:
       break;
@@ -101,11 +112,3 @@ createTile = function(tile, size){
   return div;
 }
 
-BoardRender = function(div){
-  this.div = div;
-};
-
-BoardRender.prototype.add = function(isLeft, tile){
-  var tile = createTile(tile, 6);
-  this.div.appendChild(tile);
-};
