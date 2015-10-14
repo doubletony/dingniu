@@ -11,6 +11,7 @@
 }
 #insert-left-of-board, #insert-right-of-board, #discard-tile {
   color: #fff;
+  background-color: #000;
   height:50px;
   border-radius: 5px;
   font-size: 24px;
@@ -336,10 +337,13 @@ window.onload = function() {
             {{ tile }}
           </div>
         </div>
-      {% endfor %}
+        {% endfor %}
       </div>
       </td> 
-      <td></td>
+      <td>
+        <div id='discarded-area'>
+        </div>
+      </td>
     </tr>
    </table>
 
