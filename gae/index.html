@@ -7,7 +7,16 @@
   height:50px;
   width:150px;
   border-radius: 5px;
-  font-size: 16px;
+  font-size: 24px;
+}
+#insert-left-of-board, #insert-right-of-board, #discard-tile {
+  height:50px;
+  border-radius: 5px;
+  font-size: 24px;
+}
+
+#result {
+  font-size: 24px;
 }
 
 #board {
@@ -38,6 +47,8 @@
   margin-left: auto;
   margin-right: auto;
 }
+
+
 .tile {
   font-size: 24px;
 }
@@ -49,9 +60,10 @@
 <script type="text/javascript" src="js/tile.js"> </script>
 <script type="text/javascript">
 
-var TILE_IN_HAND_SIZE = 5;
-var TILE_IN_POOL_SIZE = 4;
+var TILE_IN_HAND_SIZE = 8;
+var TILE_IN_POOL_SIZE = 6;
 var TILE_DISCARD_SIZE = 2;
+var TILE_CPU_DEAL_SIZE = 6;
 /**
  * @param {string} tileStr - The tile in string format. Parsable. '|1 3|'
  *                           and '1 3', but not '||1 3||'.
@@ -135,19 +147,19 @@ function createDealLink(div, button, url) {
           }
           setTimeout(function() {
             cpu1.innerHTML = 'CPU1 ';
-            cpu1.appendChild(createTile(parseTile(choices[0][0]), 3));
+            cpu1.appendChild(createTile(parseTile(choices[0][0]), TILE_CPU_DEAL_SIZE));
             cpuDeal(choices[0]);
             renderDiscards(cpu1, choices[0][2]);
             setTimeout(function() {
               cpu2.innerHTML = 'CPU2 ';
-              var cpu2tileDiv = createTile(parseTile(choices[1][0]), 3);
+              var cpu2tileDiv = createTile(parseTile(choices[1][0]), TILE_CPU_DEAL_SIZE);
               cpu2tileDiv.style.transform = 'rotate('+90+'deg)';
               cpu2.appendChild(cpu2tileDiv);
               cpuDeal(choices[1]);
               renderDiscards(cpu2, choices[1][2]);
               setTimeout(function() {
                 cpu3.innerHTML = 'CPU3 ';
-                cpu3.appendChild(createTile(parseTile(choices[2][0]), 3));
+                cpu3.appendChild(createTile(parseTile(choices[2][0]), TILE_CPU_DEAL_SIZE));
                 cpuDeal(choices[2]);
                 renderDiscards(cpu3, choices[2][2]);
               }, 1000);
@@ -251,7 +263,8 @@ window.onload = function() {
     <button id='gamestart' onclick='startGame(this)'>New game!</button>
     <table>
     <tr>
-      <td></td>  <td>
+      <td><div id='result'></div></td>
+      <td>
         <div class='tile' id='cpu2'>
           CPU2
         </div>
@@ -292,7 +305,6 @@ window.onload = function() {
       <td></td>
     </tr>
    </table>
-    <div id='result'>
-    </div>
+
   </body>
 </html>
