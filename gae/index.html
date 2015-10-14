@@ -188,17 +188,18 @@ function clickTile(div) {
       }
     }
   };
+  var firstChild = div.firstChild;
   left.onclick = createDealLink(div, left, 
     'API?action=deal&isLeft=1&gameId=' + gameId + '&tileId=' + tileId);
-  div.appendChild(left);
+  div.insertBefore(left, firstChild);
 
   discard.onclick = createDealLink(div, discard, 
     'API?action=deal&isDiscard=1&gameId=' + gameId + '&tileId=' + tileId);
-  div.appendChild(discard);
+  div.insertBefore(discard, firstChild);
 
   right.onclick = createDealLink(div, right, 
     'API?action=deal&isLeft=0&gameId=' + gameId + '&tileId=' + tileId);
-  div.appendChild(right);
+  div.insertBefore(right, firstChild);
   div.onclick = null;
 }
 
