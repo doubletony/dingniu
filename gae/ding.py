@@ -45,6 +45,12 @@ class Board():
     self.left = 0
     self.right = 0
 
+  def getLeftTile(self):
+    return self.tiles[0]
+
+  def getRightTile(self):
+    return self.tiles[-1]
+
   def isAddable(self, tile):
     return self.left == tile.left or self.left == tile.right or self.right == tile.left or self.right == tile.right
 

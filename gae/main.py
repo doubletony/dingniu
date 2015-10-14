@@ -106,6 +106,7 @@ def updateGame(gameId, board, player, competitors):
   result[0].players[0].hands = [str(tile) for tile in player.hands]
   result[0].players[0].discards = [str(tile) for tile in player.discards]
   choices = []
+
   for cpu in competitors:
     added = False
     for i in range(len(cpu.hands)):
@@ -113,13 +114,14 @@ def updateGame(gameId, board, player, competitors):
         added = True
         try:
           board.add(True, cpu.hands[i])
+          choices.append([display(board.getLeftTile()), 'left'])
         except Exception, e:
           board.add(False, cpu.hands[i])
-        choices.append(display(cpu.hands[i]))
+          choices.append([display(board.getRightTile()), 'right'])
         cpu.hands.pop(i)
         break
     if not added:
-      choices.append('discard')
+      choices.append(['discard', ''])
       cpu.discards.append(cpu.hands.pop(0))
 
   result[0].board = str(board)
@@ -210,6 +212,7 @@ class API(webapp2.RequestHandler):
           except Exception, e:
             self.response.write('error')
           else:
+            responseObj['oldBoard'] = display(board)
             choices = updateGame(gameId, board, player, players)
             responseObj['board'] = display(board)
             print "player hands:", len(player.hands)
