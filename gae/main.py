@@ -135,7 +135,7 @@ def updateGame(gameId, board, player, competitors):
 
 def getGameResults(players):
   points = []
-  result = ''
+  result = []
   for player in players:
     point = player.getTotalPoints()
     tiles = player.getDiscardedTiles()
@@ -164,12 +164,15 @@ def getGameResults(players):
   for player in players:
     point = player.getTotalPoints()
     if point == max_point:
-      result = result + player.name + ' loses ' + str(BIG_PENALTY) + ' Discard: ' + str(point) + ' points.\n'
+      result.append(player.name + ' loses $' + str(BIG_PENALTY))
     elif point > min_point:
-      result = result + player.name + ' loses ' + str(SMALL_PENALTY) + ' Discard: ' + str(point) + ' points.\n'
+      result.append(player.name + ' loses $' + str(SMALL_PENALTY))
     else:
-      # winner
-      result = result + player.name + ' wins ' + str(total_award * 1.0 / winner_count) + ' Discard: ' + str(point) + ' points.\n'
+      # Make the reward nice to be 4 instead of 4.0
+      reward = total_award / winner_count
+      if reward * winner_count != total_award:
+        reward = total_award * 1.0 / winner_count
+      result.append(player.name + ' wins $' + str(reward))
   return result
 
 DEPLOY_FOR_MOBILE = True

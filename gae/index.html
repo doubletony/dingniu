@@ -30,16 +30,7 @@
   flex-flow: row wrap;
 }
 
-#player{
-  width: 100%;
-  display: -webkit-flex; /* Safari */
-  display: flex;
-  -webkit-flex: 1;  /* Safari 6.1+ */
-  -ms-flex: 1;  /* IE 10 */    
-  flex: 1;
-}
-
-#cpu1, #cpu2, #cpu3 {
+#cpu1, #cpu2, #player, #cpu3 {
   font-size: 30px;
   height: 200px;
   text-align: left;
@@ -47,7 +38,7 @@
   margin-right: auto;
 }
 
-#cpu2 {
+#cpu2, #player {
   width:500px;
   display: flex;
   flex-flow: row wrap;
@@ -71,9 +62,9 @@
 
 var TILE_IN_HAND_SIZE = 8;
 var TILE_IN_POOL_SIZE = 6;
-var TILE_DISCARD_SIZE = 2;
+var TILE_DISCARD_SIZE = 3;
 var TILE_CPU_DEAL_SIZE = 6;
-var TILE_REVEALED_SIZE = 4;
+var TILE_REVEALED_SIZE = TILE_DISCARD_SIZE;
 /**
  * @param {string} tileStr - The tile in string format. Parsable. '|1 3|'
  *                           and '1 3', but not '||1 3||'.
@@ -130,17 +121,19 @@ function renderDiscards(div, numberOfDiscards) {
   };
 };
 
-function renderRevealedDiscards(allDiscards) {
+function renderResults(results, allDiscards) {
+  var player = document.getElementById('player');
+  player.innerHTML = results[0];
+
   var cpu1 = document.getElementById('cpu1');
-  cpu1.innerHTML = 'CPU1 ';
+  cpu1.innerHTML = results[1];
 
   var cpu2 = document.getElementById('cpu2');
-  cpu2.innerHTML = 'CPU2 ';
+  cpu2.innerHTML = results[2];
 
   var cpu3 = document.getElementById('cpu3');
-  cpu3.innerHTML = 'CPU3 ';
+  cpu3.innerHTML = results[3];
 
-  var player = document.getElementById('player');
 
   for (var i = 0; i < allDiscards[0].length; i++) {
     player.appendChild(createTile(parseTile(allDiscards[0][i]), TILE_REVEALED_SIZE, true));
@@ -203,9 +196,7 @@ function createDealLink(div, button, url) {
                 renderDiscards(cpu3, choices[2][2]);
                 if (responseData.hasOwnProperty('result')) {
                   setTimeout(function () {
-                  var result = document.getElementById('result');
-                  result.innerHTML = responseData['result'].replace(/(\r\n|\n|\r)/gm, "<br>");
-                  renderRevealedDiscards(responseData['allDiscards']);
+                  renderResults(responseData['result'], responseData['allDiscards']);
                   }, 1000);
                 };
               }, 1000);
