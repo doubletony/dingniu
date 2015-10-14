@@ -32,7 +32,7 @@
 
 #cpu1, #cpu2, #cpu3 {
   font-size: 30px;
-  height: 300px;
+  height: 200px;
   width: 300px;
   text-align: left;
   margin-left: auto;
@@ -170,13 +170,32 @@ function createDealLink(div, button, url) {
   }
 }
 
+function removeDivWithId (divId) {
+  var divToBeRemoved = document.getElementById(divId);
+  if (divToBeRemoved) {
+    var parent = divToBeRemoved.parent;
+    parent.removeChild(divToBeRemoved);
+  };
+}
+
 function clickTile(div) {
+  var leftId = 'insert-left-of-board';
+  var rightId = 'insert-right-of-board';
+  var discardId = 'discard-tile';
+  // Clear current option if there is any.
+  removeDivWithId(leftId);
+  removeDivWithId(rightId);
+  removeDivWithId(discardId);
+
   var left = document.createElement('BUTTON');
   left.appendChild(document.createTextNode('<<<'));
+  left.id = leftId;
   var discard = document.createElement('BUTTON');
   discard.appendChild(document.createTextNode('discard'));
+  discard.id = discardId;
   var right = document.createElement('BUTTON');
   right.appendChild(document.createTextNode('>>>'));
+  right.id = rightId;
   var gameId = window.location.search.substring('?gameId='.length);
   var tileNodes = div.parentNode.childNodes;
   var tileId = -1;
@@ -188,18 +207,18 @@ function clickTile(div) {
       }
     }
   };
-  var firstChild = div.firstChild;
+  var tilepoolDiv = document.getElementById('tilepool');
   left.onclick = createDealLink(div, left, 
     'API?action=deal&isLeft=1&gameId=' + gameId + '&tileId=' + tileId);
-  div.insertBefore(left, firstChild);
+  tilepoolDiv.insertBefore(left, tilepoolDiv.firstChild);
 
   discard.onclick = createDealLink(div, discard, 
     'API?action=deal&isDiscard=1&gameId=' + gameId + '&tileId=' + tileId);
-  div.insertBefore(discard, firstChild);
+  div.insertBefore(discard, div.firstChild);
 
   right.onclick = createDealLink(div, right, 
     'API?action=deal&isLeft=0&gameId=' + gameId + '&tileId=' + tileId);
-  div.insertBefore(right, firstChild);
+  tilepoolDiv.appendChild(right);
   div.onclick = null;
 }
 
@@ -246,9 +265,7 @@ window.onload = function() {
         </div>
       </td> <td>
       <div id='board'>
-        <<<
-        <div class='tile-pool' id='tilepool'>  {{tilepool}}  </div>
-        >>>
+        <div class='tile-pool' id='tilepool'>{{tilepool}}</div>
       </div>
       </td>
 
