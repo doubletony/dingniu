@@ -229,6 +229,7 @@ class API(webapp2.RequestHandler):
               responseObj['allDiscards'] = allDiscards
 
             responseObj['choices'] = choices
+            responseObj['mydiscards'] = [display(tile) for tile in player.discards]
             self.response.write(json.dumps(responseObj))
         elif action == 'show':
           gameId = self.request.get('gameId')

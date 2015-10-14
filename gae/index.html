@@ -34,7 +34,7 @@
   flex-flow: row wrap;
 }
 
-#tilepool {
+#tilepool, #discared-area {
   display: flex;
   flex-flow: row wrap;
 }
@@ -49,7 +49,7 @@
 }
 
 #cpu2, #player {
-  width: 600px;
+  width: 660px;
   display: flex;
   flex-flow: row wrap;
 }
@@ -162,6 +162,19 @@ function renderResults(results, allDiscards) {
   };
 };
 
+function renderMyDiscards(tileStrs) {
+  if (tileStrs.length == 0) {
+    return;
+  };
+
+  var div = document.getElementById('discarded-area');
+  div.innerHTML = '';
+
+  for (var i = 0; i < tileStrs.length; i++) {
+    div.appendChild(createTile(parseTile(tileStrs[i]), TILE_DISCARD_SIZE, true));
+  };
+}
+
 function createDealLink(div, button, url) {
   return function() {
     button.onclick = null;
@@ -175,6 +188,7 @@ function createDealLink(div, button, url) {
           var responseData = JSON.parse(xmlhttp.responseText);
           pool.innerHTML = responseData['oldBoard'];
           reRenderBoard();
+          renderMyDiscards(responseData['mydiscards']);
           var parent = div.parentNode;
           var choices = responseData['choices'];
           var cpu1 = document.getElementById('cpu1');
@@ -338,11 +352,10 @@ window.onload = function() {
           </div>
         </div>
         {% endfor %}
+        <div id='discarded-area'></div>
       </div>
       </td> 
       <td>
-        <div id='discarded-area'>
-        </div>
       </td>
     </tr>
    </table>
