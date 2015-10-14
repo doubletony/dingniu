@@ -164,12 +164,12 @@ def getGameResults(players):
   for player in players:
     point = player.getTotalPoints()
     if point == max_point:
-      result = result + player.name + ' loses $ ' + str(BIG_PENALTY) + ' Discard: ' + str(point) + ' points. ' + str([str(tile) for tile in player.discards]) + '\n'
+      result = result + player.name + ' loses ' + str(BIG_PENALTY) + ' Discard: ' + str(point) + ' points.\n'
     elif point > min_point:
-      result = result + player.name + ' loses $ ' + str(SMALL_PENALTY) + ' Discard: ' + str(point) + ' points. ' + str([str(tile) for tile in player.discards]) + '\n'
+      result = result + player.name + ' loses ' + str(SMALL_PENALTY) + ' Discard: ' + str(point) + ' points.\n'
     else:
       # winner
-      result = result + player.name + ' wins $ ' + str(total_award * 1.0 / winner_count) + ' Discard: ' + str(point) + ' points. ' + str([str(tile) for tile in player.discards]) + '\n'
+      result = result + player.name + ' wins ' + str(total_award * 1.0 / winner_count) + ' Discard: ' + str(point) + ' points.\n'
   return result
 
 DEPLOY_FOR_MOBILE = True
@@ -219,7 +219,12 @@ class API(webapp2.RequestHandler):
             print "player hands:", len(player.hands)
             if len(player.hands) == 0:
               responseObj['result'] = getGameResults([player] + players)
-              print responseObj['result']
+              allDiscards = []
+              allDiscards.append([display(tile) for tile in player.discards])
+              for cpu in players:
+                allDiscards.append([display(tile) for tile in cpu.discards])
+              responseObj['allDiscards'] = allDiscards
+
             responseObj['choices'] = choices
             self.response.write(json.dumps(responseObj))
         elif action == 'show':

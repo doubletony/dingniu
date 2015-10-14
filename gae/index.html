@@ -48,7 +48,9 @@
 }
 
 #cpu2 {
-  width:300px;
+  width:500px;
+  display: flex;
+  flex-flow: row wrap;
 }
 
 #cpu1, #cpu3 {
@@ -71,6 +73,7 @@ var TILE_IN_HAND_SIZE = 8;
 var TILE_IN_POOL_SIZE = 6;
 var TILE_DISCARD_SIZE = 2;
 var TILE_CPU_DEAL_SIZE = 6;
+var TILE_REVEALED_SIZE = 4;
 /**
  * @param {string} tileStr - The tile in string format. Parsable. '|1 3|'
  *                           and '1 3', but not '||1 3||'.
@@ -84,7 +87,7 @@ function parseTile(tileStr) {
     return [0, 0];
   };
   return [parseInt(tileStr[0]), parseInt(tileStr[2])];
-}
+};
 
 function reRenderTiles(classname) {
   var tileVisDivs = document.getElementsByClassName(classname);
@@ -93,7 +96,7 @@ function reRenderTiles(classname) {
     tileVisDivs[i].innerHTML = '';
     tileVisDivs[i].appendChild(createTile(tile, TILE_IN_HAND_SIZE, false));
   };
-}
+};
 
 function reRenderBoard() {
   var poolDiv = document.getElementById('tilepool');
@@ -108,7 +111,7 @@ function reRenderBoard() {
     var tileDiv = createTile(parseTile(boardTiles[i]), TILE_IN_POOL_SIZE, true);
     poolDiv.appendChild(tileDiv);
   };
-}
+};
 
 function renderTileOnBoard(tileStr, isLeft) {
   var poolDiv = document.getElementById('tilepool');
@@ -119,13 +122,42 @@ function renderTileOnBoard(tileStr, isLeft) {
   } else {
     poolDiv.appendChild(tileDiv);
   };
-}
+};
 
 function renderDiscards(div, numberOfDiscards) {
   for (var i = 0; i < numberOfDiscards; i++) {
     div.appendChild(createTile([0, 0], TILE_DISCARD_SIZE, true));
   };
-}
+};
+
+function renderRevealedDiscards(allDiscards) {
+  var cpu1 = document.getElementById('cpu1');
+  cpu1.innerHTML = 'CPU1 ';
+
+  var cpu2 = document.getElementById('cpu2');
+  cpu2.innerHTML = 'CPU2 ';
+
+  var cpu3 = document.getElementById('cpu3');
+  cpu3.innerHTML = 'CPU3 ';
+
+  var player = document.getElementById('player');
+
+  for (var i = 0; i < allDiscards[0].length; i++) {
+    player.appendChild(createTile(parseTile(allDiscards[0][i]), TILE_REVEALED_SIZE, true));
+  };
+
+  for (var i = 0; i < allDiscards[1].length; i++) {
+    cpu1.appendChild(createTile(parseTile(allDiscards[1][i]), TILE_REVEALED_SIZE, true));
+  };
+
+  for (var i = 0; i < allDiscards[2].length; i++) {
+    cpu2.appendChild(createTile(parseTile(allDiscards[2][i]), TILE_REVEALED_SIZE, true));
+  };
+
+  for (var i = 0; i < allDiscards[3].length; i++) {
+    cpu3.appendChild(createTile(parseTile(allDiscards[3][i]), TILE_REVEALED_SIZE, true));
+  };
+};
 
 function createDealLink(div, button, url) {
   return function() {
@@ -169,17 +201,16 @@ function createDealLink(div, button, url) {
                 cpu3.appendChild(createTile(parseTile(choices[2][0]), TILE_CPU_DEAL_SIZE));
                 cpuDeal(choices[2]);
                 renderDiscards(cpu3, choices[2][2]);
+                if (responseData.hasOwnProperty('result')) {
+                  setTimeout(function () {
+                  var result = document.getElementById('result');
+                  result.innerHTML = responseData['result'].replace(/(\r\n|\n|\r)/gm, "<br>");
+                  renderRevealedDiscards(responseData['allDiscards']);
+                  }, 1000);
+                };
               }, 1000);
             }, 1000);
           }, 1000);
-          
-          
- 
-
-          if (responseData.hasOwnProperty('result')) {
-            var result = document.getElementById('result');
-            result.innerHTML = responseData['result'].replace(/(\r\n|\n|\r)/gm, "<br>");
-          };
           parent.removeChild(div);
         }
       }
@@ -187,7 +218,7 @@ function createDealLink(div, button, url) {
     xmlhttp.open('GET', url, true);
     xmlhttp.send();
   }
-}
+};
 
 function removeDivWithId (divId) {
   var divToBeRemoved = document.getElementById(divId);
@@ -195,7 +226,7 @@ function removeDivWithId (divId) {
     var parent = divToBeRemoved.parent;
     parent.removeChild(divToBeRemoved);
   };
-}
+};
 
 function clickTile(div) {
   var leftId = 'insert-left-of-board';
@@ -239,7 +270,7 @@ function clickTile(div) {
     'API?action=deal&isLeft=0&gameId=' + gameId + '&tileId=' + tileId);
   tilepoolDiv.appendChild(right);
   div.onclick = null;
-}
+};
 
 function startGame(div) {
   var xmlhttp = new XMLHttpRequest();
@@ -257,12 +288,12 @@ function startGame(div) {
   };
   xmlhttp.open('GET', 'API?action=start', true);
   xmlhttp.send();
-}
+};
 
 window.onload = function() {
   reRenderTiles('tile-in-hand');
   reRenderBoard();
-}
+};
 </script>
 </head>
 
