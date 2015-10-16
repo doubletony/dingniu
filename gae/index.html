@@ -294,9 +294,7 @@ function startGame(div) {
       setInterval(function() {
         var gameId = xmlhttp.responseText;
         var url = '?gameId=' + gameId;
-        var a = document.createElement('a');
-        a.href = url;
-        a.click();
+        window.location.href=url;
       }, 2000);
     }
   };
